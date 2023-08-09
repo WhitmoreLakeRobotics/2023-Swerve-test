@@ -4,10 +4,11 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
+import edu.wpi.first.wpilibj2.command.RunCommand;
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -86,9 +87,21 @@ public class Robot extends TimedRobot {
     }
   }
 
+
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    m_robotContainer.getInstance().m_robotDrive.setDefaultCommand(
+            // The left stick controls translation of the robot.
+            // Turning is controlled by the X axis of the right stick.
+            new RunCommand(
+                    () -> m_robotContainer.getInstance().m_robotDrive.drive(
+                            -MathUtil.applyDeadband(m_robotContainer.getInstance().m_driverController.getLeftY(), Constants.OIConstants.kDriveDeadband),
+                            -MathUtil.applyDeadband(m_robotContainer.getInstance().m_driverController.getLeftX(), Constants.OIConstants.kDriveDeadband),
+                            -MathUtil.applyDeadband(m_robotContainer.getInstance().m_driverController.getRightX(), Constants.OIConstants.kDriveDeadband),
+                            true, true),
+                    m_robotContainer.getInstance().m_robotDrive));
+  }
 
   @Override
   public void testInit() {

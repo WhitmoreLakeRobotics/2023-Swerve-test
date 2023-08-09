@@ -33,8 +33,8 @@ import java.util.List;
  */
 public class RobotContainer {
   // The robot's subsystems
-  private final DriveSubsystem m_robotDrive = new DriveSubsystem();
-
+  public final DriveSubsystem m_robotDrive = new DriveSubsystem();
+  private static RobotContainer m_robotContainer = new RobotContainer();
   // The driver's controller
   XboxController m_driverController = new XboxController(OIConstants.kDriverControllerPort);
 
@@ -44,18 +44,19 @@ public class RobotContainer {
   public RobotContainer() {
     // Configure the button bindings
     configureButtonBindings();
+    m_robotDrive.setDefaultCommand(
+            // The left stick controls translation of the robot.
+            // Turning is controlled by the X axis of the right stick.
+            new RunCommand(
+                    () -> m_robotDrive.drive(
+                            -MathUtil.applyDeadband(m_driverController.getLeftY(), Constants.OIConstants.kDriveDeadband),
+                            -MathUtil.applyDeadband(m_driverController.getLeftX(), Constants.OIConstants.kDriveDeadband),
+                            -MathUtil.applyDeadband(m_driverController.getRightX(), Constants.OIConstants.kDriveDeadband),
+                            true, true),
+                    m_robotDrive));
 
     // Configure default commands
-    m_robotDrive.setDefaultCommand(
-        // The left stick controls translation of the robot.
-        // Turning is controlled by the X axis of the right stick.
-        new RunCommand(
-            () -> m_robotDrive.drive(
-                -MathUtil.applyDeadband(m_driverController.getLeftY(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getLeftX(), OIConstants.kDriveDeadband),
-                -MathUtil.applyDeadband(m_driverController.getRightX(), OIConstants.kDriveDeadband),
-                true, true),
-            m_robotDrive));
+
   }
 
   /**
@@ -74,6 +75,9 @@ public class RobotContainer {
             m_robotDrive));
   }
 
+  public static RobotContainer getInstance() {
+    return m_robotContainer;
+  }
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
    *
